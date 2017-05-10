@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 
-const Button = ({count, update}) => {
-  return (
-    <button className="btn btn-default" onClick={update}>
-      Кнопка была нажата {count} раз
-    </button>
-  );
+const Button = ({iconType, click, text}) => {
+	return (
+		<button className="btn btn-default" onClick={click}>
+			{iconType ? (
+				<i className={`icon fa ${iconType}`}></i>
+			) : ''}
+			<span>{text}</span>
+		</button>
+	);
 }
-
 
 export default Button;

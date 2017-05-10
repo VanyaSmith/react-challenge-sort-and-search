@@ -1,52 +1,70 @@
 import React, { Component } from 'react';
-import Button from './components/Button';
+import SearchBar from './components/SearchBar';
+import Toolbar from './components/Toolbar';
+import ActiveUser from './components/ActiveUser';
+import UserList from './components/UserList';
 
+const sort = (array, key) => {
+	if (!array.length) {
+		return [];
+	}
+	const pivot = array[0];
+	const leftArray = sort(array.slice(1).filter((value) => value[key] < pivot[key]), key);
+	const rightArray = sort(array.slice(1).filter((value) => value[key] >= pivot[key]), key);
+
+	return [...leftArray, pivot, ...rightArray];
+};
 
 export default class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      phrase: 'Нажми на кнопку!',
-      count: 0
-    };
-  }
-
-  updateBtn() {
-    const phrases = [
-      'ЖМИ!', 'Не останавливайся!',
-      'У тебя хорошо получается!', 'Красавчик!',
-      'Вот это и есть React!', 'Продолжай!',
-      'Пока ты тут нажимаешь кнопку другие работают!',
-      'Всё хватит!', 'Ну и зачем ты нажал?',
-      'В следующий раз тут будет полезный совет',
-      'Чего ты ждешь от этой кнопки?',
-      'Если дойдёшь до тысячи, то сразу научищься реакту',
-      'ой, всё!', 'Ты нажал кнопку столько раз, что обязан на ней жениться',
-      'У нас было 2 npm-пакета с реактом, 75 зависимостей от сторонних библиотек, '
-      + '5 npm-скриптов и целое множество плагинов галпа всех сортов и расцветок, '
-      + 'а также redux, jquery, mocha, пачка плагинов для eslint и ингерация с firebase. '
-      + 'Не то что бы это был необходимый набор для фронтенда. Но если начал собирать '
-      + 'вебпаком, становится трудно остановиться. Единственное, что вызывало у меня '
-      + 'опасения - это jquery. Нет ничего более беспомощного, безответственного и испорченного, '
-      + 'чем рядовой верстальщик без jquery. Я знал, что рано или поздно мы перейдем и на эту дрянь.',
-      'coub про кота-джедая: http://coub.com/view/spxn',
-      'Дальнобойщики на дороге ярости: http://coub.com/view/6h0dy',
-      'Реакция коллег на ваш код: http://coub.com/view/5rjjw',
-      'Енот ворует еду: http://coub.com/view/xi3cio',
-      'Российский дизайн: http://coub.com/view/16adw5i0'
-    ];
-    this.setState({
-      count: this.state.count + 1,
-      phrase: phrases[parseInt(Math.random() * phrases.length)]
-    });
-  }
-
-  render() {
-    return (
-      <div className="container app">
-        <Button count={this.state.count} update={this.updateBtn.bind(this)} />
-        <p style={{marginTop: 2 + 'rem'}}>{this.state.phrase}</p>
-      </div>
-    );
-  }
+	constructor(props) {
+		super(props);
+		console.log(props);
+		this.state = {
+			searchValue: '',
+			outputUsers: this.props.users,
+			activeUser: this.props.users[0]
+		};
+		this.setActiveUser = this.setActiveUser.bind(this);
+	}
+	searchInput(value) {
+		const users = this.props.users.filter((user, index) => {
+			if (user.name.indexOf(value) + 1) {
+				return user;
+			}
+		});
+		this.setState({
+			searchValue: value,
+			outputUsers: users,
+			activeUser: users[0]
+		});
+	}
+	setActiveUser(user) {
+		this.setState({activeUser: user});
+	}
+	sortByName() {
+		this.setState({outputUsers: sort(this.state.outputUsers, 'name')});
+	}
+	sortByAge() {
+		this.setState({outputUsers: sort(this.state.outputUsers, 'age')});
+	}
+	render() {
+		return (
+			<div className="container app">
+				<div className="row">
+					<SearchBar value={this.state.searchValue} searchInput={this.searchInput.bind(this)}/>
+				</div>
+				<div className="row">
+					<Toolbar sortByName={this.sortByName.bind(this)} sortByAge={this.sortByAge.bind(this)} />
+				</div>
+				<div className="row">
+					<div className="col-md-3">
+						<ActiveUser user={this.state.activeUser} />
+					</div>
+					<div className="col-md-9">
+						<UserList users={this.state.outputUsers} setActiveUser={this.setActiveUser.bind(this)} />
+					</div>
+				</div>
+			</div>
+		);
+	}
 }
